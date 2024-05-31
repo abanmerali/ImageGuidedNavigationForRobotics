@@ -1,0 +1,2 @@
+ROS-IGTL-Bridge:Tutorial6:beginner_tutorials:moveit_6dof:my_robot_6dof
+-DCATKIN_DEVEL_PREFIX=/home/rosbox/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/rosbox/catkin_ws/install -G Unix Makefiles

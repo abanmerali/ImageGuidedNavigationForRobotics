@@ -1,0 +1,8 @@
+prefix=/home/rosbox/catkin_ws/install
+
+Name: Tutorial6
+Description: Description of Tutorial6
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
