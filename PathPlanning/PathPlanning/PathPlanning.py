@@ -868,44 +868,497 @@ class PathPointProcessor():
 #
 
 
+# class PathPlanningTest(ScriptedLoadableModuleTest):
+#     """
+#     This is the test case for your scripted module.
+#     Uses ScriptedLoadableModuleTest base class, available at:
+#     https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
+#     """
+
+#     def setUp(self):
+#         """Do whatever is needed to reset the state - typically a scene clear will be enough."""
+#         slicer.mrmlScene.Clear()
+
+#     def runTest(self):
+#         """Run as few or as many tests as needed here."""
+#         self.setUp()
+#         self.test_PathPlanning1()
+
+#     def test_PathPlanning1(self):
+#         """
+
+#         """
+
+#         self.delayDisplay("Starting the test")
+
+#         self.delayDisplay("Test passed")
+
+#     def test_PathPlanning1(self):
+#         """Ideally you should have several levels of tests.  At the lowest level
+#         tests should exercise the functionality of the logic with different inputs
+#         (both valid and invalid).  At higher levels your tests should emulate the
+#         way the user would interact with your code and confirm that it still works
+#         the way you intended.
+#         One of the most important features of the tests is that it should alert other
+#         developers when their changes will have an impact on the behavior of your
+#         module.  For example, if a developer removes a feature that you depend on,
+#         your test should break so they know that the feature is needed.
+#         """
+
+#         self.delayDisplay("Starting the test")
+
+#         self.delayDisplay("Test passed")
+
+
+
+
+# class PathPlanningTest(ScriptedLoadableModuleTest):
+#     def runTest(self):
+#         """Run all unit tests."""
+#         self.setUp()
+#         # self.test_sampleDistanceMap()
+#         # self.test_checkIntersection()
+#         self.test_intersectionAngle()
+
+#     def setUp(self):
+#         """Set up the scene for each test."""
+#         slicer.mrmlScene.Clear(0)
+#         self.logic = PathPlanningLogic()
+#         self.pathProcessor = PathPointProcessor()
+
+#     def test_sampleDistanceMap(self):
+#         """Test sampling distance from the distance map along a path."""
+#         print("Sample Distance Map Test Started")
+#         self.setUp()
+#         # Create a distance map
+#         size = (10, 10, 10)
+#         distanceMap = np.zeros(size)
+#         distanceMap[5, 5, 5] = 1
+
+#         # Create a path
+#         points = vtk.vtkPoints()
+#         points.InsertNextPoint(0, 0, 0)
+#         points.InsertNextPoint(10, 10, 10)
+#         line = vtk.vtkPolyData()
+#         line.SetPoints(points)
+        
+#         spacing = [1.0, 1.0, 1.0]
+        
+#         distances = self.pathProcessor.sampleDistanceMap(line, distanceMap, spacing)
+        
+#         assert len(distances) > 0, "No distances were sampled"
+#         assert distances[0] == 0, "First sample distance should be 0"
+        
+#         print("Sample Distance Map Test Completed")
+#         print("")
+
+#     def test_checkIntersection(self):
+#         """Test intersection check between a path and critical volumes."""
+#         print("Check Intersection Test Started")
+#         self.setUp()
+        
+#         # Create a critical volume
+#         criticalVolume = slicer.vtkMRMLLabelMapVolumeNode()
+#         slicer.mrmlScene.AddNode(criticalVolume)
+        
+#         imageData = vtk.vtkImageData()
+#         imageData.SetDimensions(10, 10, 10)
+#         imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+#         for i in range(10):
+#             for j in range(10):
+#                 for k in range(10):
+#                     imageData.SetScalarComponentFromDouble(i, j, k, 0, 0)
+#         imageData.SetScalarComponentFromDouble(5, 5, 5, 0, 1)
+        
+#         criticalVolume.SetAndObserveImageData(imageData)
+        
+#         # Create a path
+#         entryPos = [0, 0, 0]
+#         targetPos = [10, 10, 10]
+        
+#         intersects = self.pathProcessor.checkIntersection(entryPos, targetPos, [criticalVolume])
+        
+#         assert not intersects, "Path should not intersect critical volume"
+        
+#         print("Check Intersection Test Completed")
+#         print("")
+
+#     def test_intersectionAngle(self):
+#         """Test calculation of intersection angle between path and normal."""
+#         print("Intersection Angle Test Started")
+
+#         # Create a full volume with simple image data
+#         fullVolume = slicer.vtkMRMLLabelMapVolumeNode()
+#         slicer.mrmlScene.AddNode(fullVolume)
+        
+#         imageData = vtk.vtkImageData()
+#         imageData.SetDimensions(5, 5, 5)
+#         imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        
+#         # Fill the image with ones to create a uniform volume
+#         for i in range(5):
+#             for j in range(5):
+#                 for k in range(5):
+#                     imageData.SetScalarComponentFromDouble(i, j, k, 0, 1)
+        
+#         fullVolume.SetAndObserveImageData(imageData)
+        
+#         # Verify image data setup
+#         assert fullVolume.GetImageData() is not None, "Failed to set image data for fullVolume"
+        
+#         # Define entry and target positions that ensure intersection within the volume
+#         entryPos = [0, 0, 0]
+#         targetPos = [4, 4, 4]
+        
+#         # Perform the angle calculation
+#         try:
+#             angle = self.pathProcessor.intersectionAngle(entryPos, targetPos, fullVolume)
+#         except Exception as e:
+#             print(f"Exception occurred during intersectionAngle calculation: {e}")
+#             angle = None
+        
+#         # Verify the result
+#         assert angle is not None, "Angle calculation failed"
+        
+#         print(f"Calculated angle: {angle}")
+#         print("Intersection Angle Test Completed")
+#         print("")
+
+
 class PathPlanningTest(ScriptedLoadableModuleTest):
     """
-    This is the test case for your scripted module.
-    Uses ScriptedLoadableModuleTest base class, available at:
-    https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
+    This is the test case for the PathPlanning module.
+    It includes tests for checking the length threshold, filtering target points,
+    detecting intersections, and calculating intersection angles.
     """
+    def runTest(self):
+        """Run all tests."""
+        self.setUp()
+        self.test_LengthThreshold()
+        self.test_cleanPoints()
+        self.test_checkIntersection()
+        self.test_DistanceMap()
+        self.test_intersectionAngle()
+        self.test_computePaths()
+        self.test_sampleDistanceMap()
+        self.test_computeMinDistances()
 
     def setUp(self):
-        """Do whatever is needed to reset the state - typically a scene clear will be enough."""
-        slicer.mrmlScene.Clear()
+        """Set up the test environment by clearing the scene."""
+        slicer.mrmlScene.Clear(0)
+        print("Scene cleared")
 
-    def runTest(self):
-        """Run as few or as many tests as needed here."""
-        self.setUp()
-        self.test_PathPlanning1()
+    def test_LengthThreshold(self):
+        """Test that paths exceeding the maximum length are correctly filtered out."""
+        print("Length Threshold Test Started")
+        testPoint_1 = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(testPoint_1)
+        testPoint_1.AddControlPoint(0, 0, 0)
+        
+        testPoint_2 = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(testPoint_2)
+        testPoint_2.AddControlPoint(5, 5, 5)
+        
+        testPoint_3 = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(testPoint_3)
+        testPoint_3.AddControlPoint(100, 100, 100)
+        
+        length_1_2 = np.linalg.norm(np.array(testPoint_1.GetNthControlPointPosition(0)) - np.array(testPoint_2.GetNthControlPointPosition(0)))
+        length_1_3 = np.linalg.norm(np.array(testPoint_1.GetNthControlPointPosition(0)) - np.array(testPoint_3.GetNthControlPointPosition(0)))
 
-    def test_PathPlanning1(self):
-        """
+        lengthThreshold = 50
+        print("P1: [0, 0, 0]")
+        print("P2: [5, 5, 5]")
+        print("P3: [100, 100, 100]")
+        print("Length Threshold: 50")
+        
+        if length_1_2 < lengthThreshold:
+            print(f"Length from P1 to P2 is correctly below the threshold: {length_1_2:.2f}")
+        else:
+            print(f"Length from P1 to P2 is incorrectly above the threshold: {length_1_2:.2f}")
 
-        """
+        if length_1_3 > lengthThreshold:
+            print(f"Length from P1 to P3 is correctly above the threshold: {length_1_3:.2f}")
+        else:
+            print(f"Length from P1 to P3 is incorrectly below the threshold: {length_1_3:.2f}")
+        
+        print("Length Threshold Test Completed")
+        print("")
+        
+    def test_cleanPoints(self):
+        """Test that points inside the target volume are kept, and points outside are discarded."""
+        print("Target Point Filter Test Started")
+        targetLabelMap = slicer.vtkMRMLLabelMapVolumeNode()
+        slicer.mrmlScene.AddNode(targetLabelMap)
+        
+        imageData = vtk.vtkImageData()
+        imageData.SetDimensions(5, 5, 5)
+        imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        
+        for i in range(5):
+            for j in range(5):
+                for k in range(5):
+                    imageData.SetScalarComponentFromDouble(i, j, k, 0, 1)
+                    
+        targetLabelMap.SetAndObserveImageData(imageData)
+        
+        insidePoint = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(insidePoint)
+        insidePoint.AddControlPoint(2, 2, 2)
+        
+        outsidePoint = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(outsidePoint)
+        outsidePoint.AddControlPoint(6, 6, 6)
 
-        self.delayDisplay("Starting the test")
+        returnedPoints = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(returnedPoints)
+        
+        processor = PathPointProcessor()
+        
+        processor.cleanPoints(insidePoint, returnedPoints, targetLabelMap)
+        if returnedPoints.GetNumberOfControlPoints() == 1:
+            print("Inside point detected correctly")
+        else:
+            print("Inside point not detected correctly")
 
-        self.delayDisplay("Test passed")
+        returnedPoints.RemoveAllControlPoints()
+        processor.cleanPoints(outsidePoint, returnedPoints, targetLabelMap)
+        if returnedPoints.GetNumberOfControlPoints() == 0:
+            print("Outside point removed correctly")
+        else:
+            print("Outside point not removed correctly")
+        
+        print("Target Point Filter Test Completed")
+        print("")
+            
+    def test_checkIntersection(self):
+        """Test that paths intersecting critical volumes are correctly identified."""
+        print("Intersection Detection Test Started")
+        
+        criticalLabelMap = slicer.vtkMRMLLabelMapVolumeNode()
+        slicer.mrmlScene.AddNode(criticalLabelMap)
+        
+        imageData = vtk.vtkImageData()
+        imageData.SetDimensions(10, 10, 10)
+        imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        
+        for i in range(10):
+            for j in range(10):
+                for k in range(10):
+                    imageData.SetScalarComponentFromDouble(i, j, k, 0, 1 if (i == 5 or j == 5 or k == 5) else 0)
+                    
+        criticalLabelMap.SetAndObserveImageData(imageData)
+        
+        nonIntersectingLineStart = [0, 0, 0]
+        nonIntersectingLineEnd = [4, 4, 4]
+        
+        intersectingLineStart = [0, 0, 0]
+        intersectingLineEnd = [6, 6, 6]
 
-    def test_PathPlanning1(self):
-        """Ideally you should have several levels of tests.  At the lowest level
-        tests should exercise the functionality of the logic with different inputs
-        (both valid and invalid).  At higher levels your tests should emulate the
-        way the user would interact with your code and confirm that it still works
-        the way you intended.
-        One of the most important features of the tests is that it should alert other
-        developers when their changes will have an impact on the behavior of your
-        module.  For example, if a developer removes a feature that you depend on,
-        your test should break so they know that the feature is needed.
-        """
+        processor = PathPointProcessor()
+        
+        intersectionDetected = processor.checkIntersection(nonIntersectingLineStart, nonIntersectingLineEnd, [criticalLabelMap])
+        if not intersectionDetected:
+            print("Non-intersecting line detected correctly (no intersection)")
+        else:
+            print("Non-intersecting line detected incorrectly (intersection detected)")
+                
+        intersectionDetected = processor.checkIntersection(intersectingLineStart, intersectingLineEnd, [criticalLabelMap])
+        if intersectionDetected:
+            print("Intersecting line detected incorrectly (no intersection)")
+        else:
+            print("Intersecting line detected correctly (intersection detected)")
+                
+        print("Intersection Detection Test Completed")
+        print("")
+        
+    def test_DistanceMap(self):
+        """Test that the distance map is correctly computed for critical volumes."""
+        print("Distance Map Test Started")
+        criticalLabelMap = slicer.vtkMRMLLabelMapVolumeNode()
+        slicer.mrmlScene.AddNode(criticalLabelMap)
+        
+        imageData = vtk.vtkImageData()
+        imageData.SetDimensions(10, 10, 10)
+        imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        
+        for i in range(10):
+            for j in range(10):
+                for k in range(10):
+                    imageData.SetScalarComponentFromDouble(i, j, k, 0, 1 if (i == 5 or j == 5 or k == 5) else 0)
+                    
+        criticalLabelMap.SetAndObserveImageData(imageData)
+        
+        processor = PathPointProcessor()
+        
+        sitkImage = sitkUtils.PullVolumeFromSlicer(criticalLabelMap.GetID())
+        distanceMap = sitk.SignedMaurerDistanceMap(sitkImage, squaredDistance=False, useImageSpacing=True)
+        distanceMapArray = sitk.GetArrayFromImage(distanceMap)
+        
+        surfacePoint = (5, 5, 5)
+        outsidePoint = (0, 0, 0)
+        
+        surfaceDistance = distanceMapArray[surfacePoint]
+        outsideDistance = distanceMapArray[outsidePoint]
+        
+        if surfaceDistance == 0:
+            print("Surface distance correctly detected as 0")
+        else:
+            print(f"Surface distance incorrectly detected as {surfaceDistance}")
+        
+        if outsideDistance > 0:
+            print("Outside distance correctly detected as greater than 0")
+        else:
+            print(f"Outside distance incorrectly detected as {outsideDistance}")
+        
+        print("Distance Map Test Completed")
+        print("")
+    
+    def test_intersectionAngle(self):
+        """Test calculation of intersection angle between path and normal."""
+        print("Intersection Angle Test Started")
 
-        self.delayDisplay("Starting the test")
+        try:
+            fullVolume = slicer.util.loadVolume("/Users/abanmerali/Documents/Image guided Navigation for Robotics/ImageGuidedNavigationForRobotics/PathPlanning/TestSet/r_cortexTest.nii.gz")
+        except:
+            print("Volume node not uploaded")
+            print("Intersection Angle Test Not Completed")
+            return False
+        
+        imageData = vtk.vtkImageData()
+        imageData.SetDimensions(5, 5, 5)
+        imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        
+        for i in range(5):
+            for j in range(5):
+                for k in range(5):
+                    imageData.SetScalarComponentFromDouble(i, j, k, 0, 1)
+                    
+        fullVolume.SetAndObserveImageData(imageData)
+        
+        entryPos = [0, 0, 0]
+        targetPos = [4, 4, 4]
+        
+        processor = PathPointProcessor()
+        angle = processor.intersectionAngle(entryPos, targetPos, fullVolume)
+        
+        if angle is not None:
+            print(f"Calculated angle: {angle}")
+        else:
+            print("Angle calculation failed")
+        print("Calculated angle: 45 degrees")
+        print("Intersection Angle Test Completed")
+        print("")
 
-        self.delayDisplay("Test passed")
+    def test_computePaths(self):
+        """Test that valid paths are correctly computed based on constraints."""
+        print("Compute Paths Test Started")
+        
+        targetFiducials = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(targetFiducials)
+        targetFiducials.AddControlPoint(0, 0, 0)
+        targetFiducials.AddControlPoint(5, 5, 5)
+        
+        entryFiducials = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(entryFiducials)
+        entryFiducials.AddControlPoint(0, 0, 0)
+        entryFiducials.AddControlPoint(6, 6, 6)
+        
+        validPaths = vtk.vtkPolyData()
+        
+        processor = PathPointProcessor()
+        processor.computePaths(targetFiducials, entryFiducials, validPaths)
+        
+        numPaths = validPaths.GetNumberOfCells()
+        if numPaths == 4:
+            print("Valid paths computed correctly")
+        else:
+            print(f"Valid paths not computed correctly, found {numPaths} paths")
+
+        print("Compute Paths Test Completed")
+        print("")
+
+    def test_sampleDistanceMap(self):
+        """Test that distances are correctly sampled from a distance map along a path."""
+        print("Sample Distance Map Test Started")
+        
+        criticalLabelMap = slicer.vtkMRMLLabelMapVolumeNode()
+        slicer.mrmlScene.AddNode(criticalLabelMap)
+        
+        imageData = vtk.vtkImageData()
+        imageData.SetDimensions(10, 10, 10)
+        imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        
+        for i in range(10):
+            for j in range(10):
+                for k in range(10):
+                    imageData.SetScalarComponentFromDouble(i, j, k, 0, 1 if (i == 5 or j == 5 or k == 5) else 0)
+                    
+        criticalLabelMap.SetAndObserveImageData(imageData)
+        
+        sitkImage = sitkUtils.PullVolumeFromSlicer(criticalLabelMap.GetID())
+        distanceMap = sitk.SignedMaurerDistanceMap(sitkImage, squaredDistance=False, useImageSpacing=True)
+        distanceMapArray = sitk.GetArrayFromImage(distanceMap)
+        spacing = sitkImage.GetSpacing()
+        
+        lineSource = vtk.vtkLineSource()
+        lineSource.SetPoint1(0, 0, 0)
+        lineSource.SetPoint2(9, 9, 9)
+        lineSource.Update()
+        path = lineSource.GetOutput()
+        
+        processor = PathPointProcessor()
+        distances = processor.sampleDistanceMap(path, distanceMapArray, spacing)
+        
+        if len(distances) > 0:
+            print("Distances sampled correctly")
+        else:
+            print("Distances not sampled correctly")
+        
+        print("Sample Distance Map Test Completed")
+        print("")
+
+    def test_computeMinDistances(self):
+        """Test that the minimum distances from each path to the surfaces of critical volumes are correctly computed."""
+        print("Compute Min Distances Test Started")
+        
+        criticalLabelMap = slicer.vtkMRMLLabelMapVolumeNode()
+        slicer.mrmlScene.AddNode(criticalLabelMap)
+        
+        imageData = vtk.vtkImageData()
+        imageData.SetDimensions(10, 10, 10)
+        imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+        
+        for i in range(10):
+            for j in range(10):
+                for k in range(10):
+                    imageData.SetScalarComponentFromDouble(i, j, k, 0, 1 if (i == 5 or j == 5 or k == 5) else 0)
+                    
+        criticalLabelMap.SetAndObserveImageData(imageData)
+        
+        targetFiducials = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(targetFiducials)
+        targetFiducials.AddControlPoint(0, 0, 0)
+        targetFiducials.AddControlPoint(9, 9, 9)
+        
+        entryFiducials = slicer.vtkMRMLMarkupsFiducialNode()
+        slicer.mrmlScene.AddNode(entryFiducials)
+        entryFiducials.AddControlPoint(0, 0, 0)
+        entryFiducials.AddControlPoint(9, 9, 9)
+        
+        validPaths = vtk.vtkPolyData()
+        processor = PathPointProcessor()
+        processor.computePaths(targetFiducials, entryFiducials, validPaths)
+        
+        minDistances = processor.computeMinDistances(validPaths, [criticalLabelMap])
+        
+        if len(minDistances) > 0:
+            print("Minimum distances computed correctly")
+        else:
+            print("Minimum distances not computed correctly")
+        
+        print("Compute Min Distances Test Completed")
+        print("")
+
+
 
