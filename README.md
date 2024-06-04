@@ -20,7 +20,7 @@ The Path Planning module in 3D Slicer computes the optimal paths for electrode i
 - **Angle Calculation**: Calculates the angle between the trajectory and the normal of the surface.
 - **Visualisation**: Outputs the computed optimal path for visualisation.
 
-For detailed instructions and usage, refer to the [PathPlanning README](ImageGuidedNavigationForRobotics/ROS/README.md).
+For detailed instructions and usage, refer to the [PathPlanning README](ROS/README.md).
 
 ## CatkinWorkspaceforROS
 
@@ -32,7 +32,7 @@ The ROS components translate the planned trajectories from 3D Slicer into action
 - **Trajectory Execution**: Uses MoveIt for computing and executing valid joint trajectories.
 - **Visualisation**: Utilises RViz to monitor the robot's movements in real-time.
 
-For detailed instructions and usage, refer to the [ROS README](ImageGuidedNavigationForRobotics/PathPlanning/README.md).
+For detailed instructions and usage, refer to the [ROS README](PathPlanning/README.md).
 
 ## Dependencies
 
