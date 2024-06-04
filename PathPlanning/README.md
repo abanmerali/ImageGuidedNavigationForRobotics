@@ -68,6 +68,8 @@ This module relies on the following libraries and functionalities:
 - **SimpleITK**: For image processing tasks.
 - **sitkUtils**: For conversion between SimpleITK and VTK data structures.
 - **ScriptedLoadableModule**: For slicer widget and UI interaction - https://github.com/Slicer/Slicer/blob/main/Base/Python/slicer/ScriptedLoadableModule.py
+- **SlicerIGT**: A 3D Slicer extension for image-guided therapy research. Installed via the 3D Slicer Extensions Manager.
+- **SlicerOpenIGTLink**: A 3D Slicer extension for OpenIGTLink communication. Installed via the 3D Slicer Extensions Manager.
 
 ## Acknowledgements
 
